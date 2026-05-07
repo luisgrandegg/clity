@@ -1,0 +1,52 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Headers API",
+    "version": "1.0.0",
+    "description": "Minimal fixture exercising required and optional header parameters. Used by the F-007 end-to-end test to lock the runtime's header-mapping behaviour."
+  },
+  "servers": [
+    {
+      "url": "https://example.test"
+    }
+  ],
+  "paths": {
+    "/echo": {
+      "get": {
+        "summary": "Echo request headers",
+        "operationId": "echoHeaders",
+        "parameters": [
+          {
+            "name": "X-Request-Id",
+            "in": "header",
+            "description": "Required correlation id supplied by the caller.",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "X-Trace-Id",
+            "in": "header",
+            "description": "Optional distributed-tracing id.",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Echoes which headers the server received.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

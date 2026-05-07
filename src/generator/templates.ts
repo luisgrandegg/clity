@@ -133,6 +133,8 @@ Every operation in \`describe\` becomes a subcommand of the same name. Path /
 query / header parameters become flags by their \`flagName\` (kebab-case of
 the OpenAPI name). Required params are enforced before any request is made.
 
+Header parameters declared in the spec (\`in: header\`) are fully supported: the value passed via the corresponding flag is sent as an HTTP request header, and the header is omitted entirely when the flag is not provided.
+
 \`\`\`bash
 # Path / query / header param
 ${spec.cliName} <command> --pet-id 1 --status sold
