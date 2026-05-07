@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { existsSync } from 'node:fs'
 
@@ -19,5 +19,7 @@ if (!existsSync(target)) {
   process.exit(1)
 }
 
-const mod = await import(target)
+// Dynamic import() requires a file:// URL on Windows; an absolute path string
+// is parsed as a URL with the drive letter as scheme (`c:`) and rejected.
+const mod = await import(pathToFileURL(target).href)
 await mod.main(process.argv.slice(2))

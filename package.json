@@ -24,7 +24,7 @@
     "test": "node --test --test-reporter=spec dist/test/*.test.js",
     "test:update": "node scripts/update-snapshots.mjs",
     "pretest": "tsc",
-    "smoke": "pnpm build && node bin/clity.mjs ./test/fixtures/petstore.json --output ./test/.tmp/petstore-cli --force && node ./test/.tmp/petstore-cli/bin/cli.js describe | jq '.operations | length'",
+    "smoke": "node scripts/smoke.mjs",
     "prepublishOnly": "pnpm build"
   },
   "engines": {
