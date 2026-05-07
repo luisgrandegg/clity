@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit",
+      "Bash(git rev-parse:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)",
+      "Bash(git log:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(git stash:*)",
+      "Bash(git pull:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git config:*)",
+      "Bash(git rm:*)",
+      "Bash(git -C:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm smoke:*)",
+      "Bash(pnpm --filter:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(node:*)",
+      "Bash(npx clity:*)",
+      "Bash(npx tsc:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh run:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh api:*)",
+      "Bash(jq:*)",
+      "Bash(chmod:*)"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+dist
+*.tsbuildinfo
+
+# Misc
+.DS_Store
+*.log
+
+# Env
+.env
+.env*.local
+
+# Test fixtures generated at runtime
+test/.tmp/
+
+# Claude Code local settings (personal overrides — not shared)
+.claude/settings.local.json

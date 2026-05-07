@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+  type-check:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm type-check
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test
+
+  smoke:
+    name: Smoke (petstore)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: sudo apt-get update && sudo apt-get install -y jq
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Generate petstore CLI
+        run: node bin/clity.mjs ./test/fixtures/petstore.json --output ./test/.tmp/petstore-cli --force
+      - name: Install generated package deps
+        working-directory: ./test/.tmp/petstore-cli
+        run: npm install --no-audit --no-fund
+      - name: Verify describe
+        run: |
+          COUNT=$(node ./test/.tmp/petstore-cli/bin/cli.js describe | jq '.operations | length')
+          echo "operation count: $COUNT"
+          test "$COUNT" -gt 0
+      - name: Verify usage error contract
+        run: |
+          set +e
+          OUT=$(node ./test/.tmp/petstore-cli/bin/cli.js get-pet-by-id 2>&1 1>/dev/null)
+          CODE=$?
+          set -e
+          echo "stderr: $OUT"
+          echo "exit: $CODE"
+          test "$CODE" -eq 1
+          echo "$OUT" | jq -e '.error == "usage"' > /dev/null
