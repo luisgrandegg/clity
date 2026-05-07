@@ -1,0 +1,50 @@
+{
+  "name": "clity",
+  "version": "0.1.0",
+  "description": "OpenAPI → agent-ready CLI generator. Turn any API spec into a CLI that AI agents can drive over stdin/stdout.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "clity": "bin/clity.mjs"
+  },
+  "main": "./dist/cli.js",
+  "types": "./dist/cli.d.ts",
+  "files": [
+    "bin",
+    "dist",
+    "src/generator/runtime",
+    "AGENTS.md",
+    "README.md"
+  ],
+  "scripts": {
+    "prepare": "git config --local core.hooksPath githooks 2>/dev/null || true",
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "node --test --test-reporter=spec dist/test/*.test.js",
+    "pretest": "tsc",
+    "smoke": "pnpm build && node bin/clity.mjs ./test/fixtures/petstore.json --output ./test/.tmp/petstore-cli --force && node ./test/.tmp/petstore-cli/bin/cli.js describe | jq '.operations | length'",
+    "prepublishOnly": "pnpm build"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@readme/openapi-parser": "^2.6.0",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "typescript": "^5.6.3"
+  },
+  "keywords": [
+    "openapi",
+    "swagger",
+    "cli",
+    "generator",
+    "agents",
+    "ai",
+    "claude",
+    "llm"
+  ]
+}
