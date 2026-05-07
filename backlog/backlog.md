@@ -19,7 +19,6 @@ The MVP scope is in [`MVP.md`](../MVP.md). Items below decompose that scope into
 | F-003 | ✅ | Generated CLI runtime: commander + native fetch + describe + auth |
 | F-004 | ✅ | Stable error contract: stderr JSON + documented exit codes |
 | F-005 | ✅ | Petstore smoke test wired into CI |
-| F-006 | 🔲 | Snapshot tests for `describe` output (lock the contract) |
 | F-007 | 🔲 | Header parameter support fixture + tests |
 
 ## Beyond MVP
