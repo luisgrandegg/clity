@@ -1,0 +1,802 @@
+{
+  "describeVersion": 1,
+  "cliName": "petstore",
+  "cliVersion": "0.1.0",
+  "title": "Swagger Petstore",
+  "apiVersion": "1.0.7",
+  "description": "A trimmed-down OpenAPI 3.0 spec used as the canonical clity fixture. Modeled after the official petstore.swagger.io spec; restricted to operations exercising path params, query params, JSON bodies, and bearer / api-key auth.",
+  "baseUrl": "https://petstore3.swagger.io/api/v3",
+  "servers": [
+    "https://petstore3.swagger.io/api/v3"
+  ],
+  "operations": [
+    {
+      "command": "add-pet",
+      "operationId": "addPet",
+      "method": "post",
+      "path": "/pet",
+      "summary": "Add a new pet to the store",
+      "tags": [
+        "pet"
+      ],
+      "params": [],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "description": "Pet object that needs to be added to the store",
+        "schema": {
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "name": {
+              "type": "string",
+              "example": "doggie"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "available",
+                "pending",
+                "sold"
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "responses": [
+        {
+          "status": "200",
+          "description": "Successful operation",
+          "contentType": "application/json",
+          "schema": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "name": {
+                "type": "string",
+                "example": "doggie"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "available",
+                  "pending",
+                  "sold"
+                ]
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        {
+          "status": "405",
+          "description": "Invalid input"
+        }
+      ],
+      "security": [
+        "bearerAuth"
+      ]
+    },
+    {
+      "command": "update-pet",
+      "operationId": "updatePet",
+      "method": "put",
+      "path": "/pet",
+      "summary": "Update an existing pet",
+      "tags": [
+        "pet"
+      ],
+      "params": [],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "name": {
+              "type": "string",
+              "example": "doggie"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "available",
+                "pending",
+                "sold"
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "responses": [
+        {
+          "status": "200",
+          "description": "Successful operation"
+        },
+        {
+          "status": "400",
+          "description": "Invalid ID supplied"
+        },
+        {
+          "status": "404",
+          "description": "Pet not found"
+        }
+      ],
+      "security": [
+        "bearerAuth"
+      ]
+    },
+    {
+      "command": "find-pets-by-status",
+      "operationId": "findPetsByStatus",
+      "method": "get",
+      "path": "/pet/findByStatus",
+      "summary": "Finds Pets by status",
+      "tags": [
+        "pet"
+      ],
+      "params": [
+        {
+          "name": "status",
+          "flagName": "status",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "description": "Status values that need to be considered for filter",
+          "default": "available",
+          "enum": [
+            "available",
+            "pending",
+            "sold"
+          ],
+          "schema": {
+            "type": "string",
+            "default": "available",
+            "enum": [
+              "available",
+              "pending",
+              "sold"
+            ]
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": "200",
+          "description": "successful operation",
+          "contentType": "application/json",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "doggie"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "available",
+                    "pending",
+                    "sold"
+                  ]
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid status value"
+        }
+      ],
+      "security": [
+        "bearerAuth"
+      ]
+    },
+    {
+      "command": "find-pets-by-tags",
+      "operationId": "findPetsByTags",
+      "method": "get",
+      "path": "/pet/findByTags",
+      "summary": "Finds Pets by tags",
+      "tags": [
+        "pet"
+      ],
+      "params": [
+        {
+          "name": "tags",
+          "flagName": "tags",
+          "in": "query",
+          "required": false,
+          "type": "array",
+          "itemsType": "string",
+          "description": "Tags to filter by",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": "200",
+          "description": "successful operation",
+          "contentType": "application/json",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "doggie"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "available",
+                    "pending",
+                    "sold"
+                  ]
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid tag value"
+        }
+      ],
+      "security": [
+        "bearerAuth"
+      ]
+    },
+    {
+      "command": "get-pet-by-id",
+      "operationId": "getPetById",
+      "method": "get",
+      "path": "/pet/{petId}",
+      "summary": "Find pet by ID",
+      "tags": [
+        "pet"
+      ],
+      "params": [
+        {
+          "name": "petId",
+          "flagName": "pet-id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "ID of pet to return",
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": "200",
+          "description": "successful operation",
+          "contentType": "application/json",
+          "schema": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "name": {
+                "type": "string",
+                "example": "doggie"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "available",
+                  "pending",
+                  "sold"
+                ]
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid ID supplied"
+        },
+        {
+          "status": "404",
+          "description": "Pet not found"
+        }
+      ],
+      "security": [
+        "api_key"
+      ]
+    },
+    {
+      "command": "delete-pet",
+      "operationId": "deletePet",
+      "method": "delete",
+      "path": "/pet/{petId}",
+      "summary": "Deletes a pet",
+      "tags": [
+        "pet"
+      ],
+      "params": [
+        {
+          "name": "api_key",
+          "flagName": "api-key",
+          "in": "header",
+          "required": false,
+          "type": "string",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "petId",
+          "flagName": "pet-id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "description": "Pet id to delete",
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": "400",
+          "description": "Invalid ID supplied"
+        },
+        {
+          "status": "404",
+          "description": "Pet not found"
+        }
+      ],
+      "security": [
+        "bearerAuth"
+      ]
+    },
+    {
+      "command": "place-order",
+      "operationId": "placeOrder",
+      "method": "post",
+      "path": "/store/order",
+      "summary": "Place an order for a pet",
+      "tags": [
+        "store"
+      ],
+      "params": [],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "petId": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "quantity": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "placed",
+                "approved",
+                "delivered"
+              ]
+            }
+          }
+        }
+      },
+      "responses": [
+        {
+          "status": "200",
+          "description": "successful operation",
+          "contentType": "application/json",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "petId": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "placed",
+                  "approved",
+                  "delivered"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid Order"
+        }
+      ],
+      "security": [
+        "bearerAuth"
+      ]
+    },
+    {
+      "command": "get-order-by-id",
+      "operationId": "getOrderById",
+      "method": "get",
+      "path": "/store/order/{orderId}",
+      "summary": "Find purchase order by ID",
+      "tags": [
+        "store"
+      ],
+      "params": [
+        {
+          "name": "orderId",
+          "flagName": "order-id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 10
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": "200",
+          "description": "successful operation",
+          "contentType": "application/json",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "petId": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "placed",
+                  "approved",
+                  "delivered"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid ID supplied"
+        },
+        {
+          "status": "404",
+          "description": "Order not found"
+        }
+      ],
+      "security": [
+        "bearerAuth"
+      ]
+    },
+    {
+      "command": "delete-order",
+      "operationId": "deleteOrder",
+      "method": "delete",
+      "path": "/store/order/{orderId}",
+      "summary": "Delete purchase order by ID",
+      "tags": [
+        "store"
+      ],
+      "params": [
+        {
+          "name": "orderId",
+          "flagName": "order-id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": "400",
+          "description": "Invalid ID supplied"
+        },
+        {
+          "status": "404",
+          "description": "Order not found"
+        }
+      ],
+      "security": [
+        "bearerAuth"
+      ]
+    },
+    {
+      "command": "create-user",
+      "operationId": "createUser",
+      "method": "post",
+      "path": "/user",
+      "summary": "Create user",
+      "tags": [
+        "user"
+      ],
+      "params": [],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "username": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "responses": [
+        {
+          "status": "default",
+          "description": "successful operation",
+          "contentType": "application/json",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "username": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "security": [
+        "bearerAuth"
+      ]
+    },
+    {
+      "command": "login-user",
+      "operationId": "loginUser",
+      "method": "get",
+      "path": "/user/login",
+      "summary": "Logs user into the system",
+      "tags": [
+        "user"
+      ],
+      "params": [
+        {
+          "name": "username",
+          "flagName": "username",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "password",
+          "flagName": "password",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": "200",
+          "description": "successful operation",
+          "contentType": "application/json",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid username/password supplied"
+        }
+      ],
+      "security": [
+        "bearerAuth"
+      ]
+    },
+    {
+      "command": "get-user-by-name",
+      "operationId": "getUserByName",
+      "method": "get",
+      "path": "/user/{username}",
+      "summary": "Get user by user name",
+      "tags": [
+        "user"
+      ],
+      "params": [
+        {
+          "name": "username",
+          "flagName": "username",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": "200",
+          "description": "successful operation",
+          "contentType": "application/json",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "username": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "status": "400",
+          "description": "Invalid username supplied"
+        },
+        {
+          "status": "404",
+          "description": "User not found"
+        }
+      ],
+      "security": [
+        "bearerAuth"
+      ]
+    }
+  ],
+  "security": [
+    {
+      "name": "api_key",
+      "type": "apiKey",
+      "in": "header",
+      "paramName": "api_key"
+    },
+    {
+      "name": "bearerAuth",
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "JWT"
+    }
+  ],
+  "generator": {
+    "name": "clity",
+    "version": "0.1.0",
+    "specSource": "test/fixtures/petstore.json"
+  }
+}

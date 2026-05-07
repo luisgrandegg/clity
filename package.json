@@ -22,6 +22,7 @@
     "type-check": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test": "node --test --test-reporter=spec dist/test/*.test.js",
+    "test:update": "node scripts/update-snapshots.mjs",
     "pretest": "tsc",
     "smoke": "node scripts/smoke.mjs",
     "prepublishOnly": "pnpm build"
