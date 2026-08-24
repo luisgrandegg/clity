@@ -796,7 +796,7 @@
   ],
   "generator": {
     "name": "clity",
-    "version": "0.1.0",
+    "version": "0.0.0-snapshot",
     "specSource": "test/fixtures/petstore.json"
   }
 }

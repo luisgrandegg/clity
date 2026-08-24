@@ -3,6 +3,7 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import type { CliSpec, EmittedFile } from '../types.js'
+import { breakCycles } from './cycles.js'
 import { agentsMd, operationsJson, packageJson, readme } from './templates.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -12,18 +13,23 @@ const here = dirname(fileURLToPath(import.meta.url))
  * read from disk (they live in src/generator/runtime/) and copied verbatim.
  * No templating is applied to them — the spec they need is loaded at runtime
  * from `lib/operations.json`.
+ *
+ * Cycles are broken up-front so every template sees a serialisable spec — a
+ * dereferenced recursive schema is a circular object and would otherwise throw
+ * in `JSON.stringify`. See ./cycles.ts.
  */
 export function emit(spec: CliSpec): EmittedFile[] {
   const cliJs = readRuntimeFile('cli.js')
   const runtimeJs = readRuntimeFile('runtime.js')
+  const acyclic = breakCycles(spec)
 
   return [
-    { path: 'package.json', content: packageJson(spec) },
-    { path: 'README.md', content: readme(spec) },
-    { path: 'AGENTS.md', content: agentsMd(spec) },
+    { path: 'package.json', content: packageJson(acyclic) },
+    { path: 'README.md', content: readme(acyclic) },
+    { path: 'AGENTS.md', content: agentsMd(acyclic) },
     { path: 'bin/cli.js', content: cliJs, executable: true },
     { path: 'lib/runtime.js', content: runtimeJs },
-    { path: 'lib/operations.json', content: operationsJson(spec) },
+    { path: 'lib/operations.json', content: operationsJson(acyclic) },
     { path: '.gitignore', content: 'node_modules\n' },
   ]
 }

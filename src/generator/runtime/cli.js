@@ -57,7 +57,7 @@ auth
   .description('Write --token and/or --api-key to the config file (non-interactive)')
   .option('--token <token>', 'Bearer token to save')
   .option('--api-key <key>', 'API key to save')
-  .action((opts) => runtime.runAuthSet(spec, opts))
+  .action((opts) => runtime.runAuthSet(spec, opts, program.opts()))
 
 auth
   .command('show')

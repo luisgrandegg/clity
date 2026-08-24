@@ -1,0 +1,90 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Recursive API",
+    "version": "1.0.0",
+    "description": "Minimal fixture exercising recursive schemas. Dereferencing inlines every $ref, so these self-references become circular objects. Used by the F-008 tests to lock the cycle-marker behaviour of the emitted describe document."
+  },
+  "servers": [
+    {
+      "url": "https://example.test"
+    }
+  ],
+  "paths": {
+    "/tree": {
+      "get": {
+        "summary": "Fetch a node tree",
+        "operationId": "getTree",
+        "responses": {
+          "200": {
+            "description": "A tree whose nodes contain further nodes.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Node" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/threads": {
+      "post": {
+        "summary": "Create a comment thread",
+        "operationId": "createThread",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Comment" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created thread.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Comment" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Node": {
+        "type": "object",
+        "description": "Direct self-reference through an array (a tree).",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "children": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Node" }
+          }
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "description": "Mutual recursion: Comment -> Author -> Comment.",
+        "properties": {
+          "body": { "type": "string" },
+          "author": { "$ref": "#/components/schemas/Author" },
+          "replies": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Comment" }
+          }
+        }
+      },
+      "Author": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "latestComment": { "$ref": "#/components/schemas/Comment" }
+        }
+      }
+    }
+  }
+}

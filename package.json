@@ -1,6 +1,6 @@
 {
   "name": "clity",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "OpenAPI → agent-ready CLI generator. Turn any API spec into a CLI that AI agents can drive over stdin/stdout.",
   "type": "module",
   "license": "MIT",

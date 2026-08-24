@@ -71,7 +71,7 @@ export interface CliOperation {
 }
 
 export interface CliSpec {
-  /** describe-output schema version. Bumps follow CONSTITUTION.md § 7. */
+  /** describe-output schema version. Bumps follow CONSTITUTION.md § Versioning. */
   describeVersion: 1
   /** The generated package's CLI name (`bin` key). */
   cliName: string

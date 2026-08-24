@@ -235,14 +235,21 @@ function runDescribeOne(spec, commandName) {
   process.exit(EXIT.OK)
 }
 
-function runAuthSet(spec, opts) {
-  if (opts.token === undefined && opts.apiKey === undefined) {
+// The root program declares --token/--api-key too, and Commander binds those
+// flags to the root command even when they appear after `auth set`. So the
+// subcommand's own options are always empty in practice; fall back to the
+// root's values, preferring anything Commander did manage to bind locally.
+function runAuthSet(spec, opts, globalOpts) {
+  const root = globalOpts || {}
+  const token = opts.token !== undefined ? opts.token : root.token
+  const apiKey = opts.apiKey !== undefined ? opts.apiKey : root.apiKey
+  if (token === undefined && apiKey === undefined) {
     writeError({ error: 'usage', message: 'auth set requires --token and/or --api-key' })
     process.exit(EXIT.USAGE)
   }
   const cfg = readConfig(spec.cliName)
-  if (opts.token !== undefined) cfg.token = opts.token
-  if (opts.apiKey !== undefined) cfg.apiKey = opts.apiKey
+  if (token !== undefined) cfg.token = token
+  if (apiKey !== undefined) cfg.apiKey = apiKey
   const file = writeConfig(spec.cliName, cfg)
   writeOut({ ok: true, configFile: file, fields: Object.keys(cfg) })
   process.exit(EXIT.OK)
