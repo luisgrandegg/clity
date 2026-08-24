@@ -28,18 +28,40 @@ function generatorVersion(): string {
   return '0.0.0'
 }
 
+/**
+ * Which pipeline stage an error came from. Surfaces as the `error` field of the
+ * generator's stderr JSON, so a failure to serialise the spec is not reported
+ * as a spec parse failure.
+ */
+export type GeneratorStage = 'parse' | 'normalize' | 'emit' | 'write'
+
+interface StagedError extends Error {
+  stage?: GeneratorStage
+}
+
+/** Run `fn`, tagging anything it throws with the stage it failed in. */
+async function inStage<T>(stage: GeneratorStage, fn: () => T | Promise<T>): Promise<T> {
+  try {
+    return await fn()
+  } catch (err) {
+    const e: StagedError = err instanceof Error ? err : new Error(String(err))
+    e.stage ??= stage
+    throw e
+  }
+}
+
 /** Generator entrypoint. Returns the generated package directory on success. */
 export async function generate(opts: GeneratorOptions): Promise<string> {
   const outputDir = resolve(process.cwd(), opts.output)
   ensureOutputDir(outputDir, Boolean(opts.force))
 
-  const doc = await parseSpec(opts.spec)
+  const doc = await inStage('parse', () => parseSpec(opts.spec))
 
   const info = ((doc.info as Record<string, unknown> | undefined) ?? {}) as Record<string, unknown>
   const cliName = opts.name ?? deriveCliName(typeof info.title === 'string' ? info.title : 'api') ?? 'api-cli'
   const cliVersion = opts.version ?? (typeof info.version === 'string' ? info.version : '0.1.0')
 
-  const spec = normalize({
+  const spec = await inStage('normalize', () => normalize({
     doc,
     cliName,
     cliVersion,
@@ -47,17 +69,19 @@ export async function generate(opts: GeneratorOptions): Promise<string> {
     baseUrlOverride: opts.baseUrl,
     specSource: opts.spec,
     generatorVersion: generatorVersion(),
-  })
+  }))
 
-  const files = emit(spec)
-  for (const f of files) {
-    const abs = join(outputDir, f.path)
-    mkdirSync(dirname(abs), { recursive: true })
-    writeFileSync(abs, f.content)
-    if (f.executable && process.platform !== 'win32') {
-      chmodSync(abs, 0o755)
+  const files = await inStage('emit', () => emit(spec))
+  await inStage('write', () => {
+    for (const f of files) {
+      const abs = join(outputDir, f.path)
+      mkdirSync(dirname(abs), { recursive: true })
+      writeFileSync(abs, f.content)
+      if (f.executable && process.platform !== 'win32') {
+        chmodSync(abs, 0o755)
+      }
     }
-  }
+  })
 
   return outputDir
 }
@@ -131,7 +155,8 @@ export async function main(argv: string[]): Promise<void> {
       const message = err instanceof Error ? err.message : String(err)
       // Network errors talking to a remote spec → exit 4 per the documented map.
       const isNetwork = /ENOTFOUND|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|fetch failed/i.test(message)
-      writeError({ error: isNetwork ? 'network' : 'parse', message })
+      const stage = (err as StagedError | undefined)?.stage
+      writeError({ error: isNetwork ? 'network' : (stage ?? 'parse'), message })
       process.exit(isNetwork ? 4 : 1)
     }
   })

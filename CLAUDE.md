@@ -49,8 +49,13 @@ The generator is the implementation. The generated CLI is the product the user i
 │   └── utils.ts
 ├── test/
 │   ├── fixtures/              # Sample OpenAPI specs (petstore, minimal, edge cases)
+│   ├── __snapshots__/         # Locked describe output (see ADR-0001)
 │   ├── normalize.test.ts      # Unit tests for the normalizer
-│   └── generator.test.ts      # Generates against fixtures and asserts on output
+│   ├── generator.test.ts      # Generates against fixtures and asserts on output
+│   ├── describe-snapshot.test.ts  # Locks the describe contract (F-006)
+│   ├── headers.test.ts        # Header params end-to-end (F-007)
+│   ├── cycles.test.ts         # Cycle-breaking unit tests (F-008)
+│   └── recursive.test.ts      # Recursive schemas end-to-end (F-008)
 ├── backlog/
 │   ├── backlog.md             # Active feature list — check this for project state
 │   ├── todo/                  # Individual feature files
@@ -62,7 +67,9 @@ The generator is the implementation. The generated CLI is the product the user i
 ├── githooks/
 │   └── pre-commit             # Backlog consistency check
 ├── scripts/
-│   └── check-backlog-consistency.js
+│   ├── check-backlog-consistency.mjs   # Run by githooks/pre-commit
+│   ├── smoke.mjs                       # `pnpm smoke`
+│   └── update-snapshots.mjs            # `pnpm test:update`
 ├── .github/
 │   ├── workflows/ci.yml       # lint + typecheck + test
 │   └── pull_request_template.md
@@ -138,10 +145,17 @@ This contract is versioned. See `CONSTITUTION.md § 2`.
 
 ### CI gates (run on every PR)
 
-- `pnpm lint` — `tsc --noEmit` succeeds
-- `pnpm type-check` — TypeScript strict, zero errors
-- `pnpm build` — clean build to `dist/`
-- `pnpm test` — unit + smoke tests pass
+These are the jobs in `.github/workflows/ci.yml`:
+
+| Job | Command |
+|---|---|
+| Build | `pnpm build` — clean build to `dist/` |
+| TypeScript | `pnpm type-check` — TypeScript strict, zero errors |
+| Test | `pnpm test` — unit + integration tests pass |
+| Smoke (petstore) | Generates the petstore CLI, then asserts `describe` returns operations and a missing required flag exits 1 with `{"error":"usage"}` |
+
+`pnpm lint` is an alias of `pnpm type-check` (both run `tsc --noEmit`), so CI
+runs it once under the TypeScript job rather than as a separate gate.
 
 ---
 
@@ -162,6 +176,9 @@ Slash commands live in `.claude/commands/`.
 | `/tackle-backlog`         | Spawn one agent per backlog feature                                    |
 | `/discover`               | Explore the repo's architecture for a new contributor                  |
 
+`.claude/commands/commands-readme.md` documents this table itself; it is
+reference material, not an invocable command.
+
 ---
 
 ## Backlog
@@ -172,7 +189,7 @@ Current feature status is always in [`backlog/backlog.md`](./backlog/backlog.md)
 
 Complete the backlog item when **all of the following are true**:
 - The feature's code is committed on the current branch
-- `pnpm type-check` and `pnpm lint` report zero errors
+- `pnpm type-check` reports zero errors (`pnpm lint` is the same command)
 - `pnpm test` passes
 - You are about to run `/create-pr`
 

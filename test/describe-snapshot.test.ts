@@ -17,6 +17,9 @@ import { generate } from '../src/cli.js'
  * - `generator.specSource` echoes the absolute path the caller passed in, which
  *   is environment-dependent. We rewrite it to a stable string before
  *   comparison.
+ * - `generator.version` is clity's own release version, which changes on every
+ *   release and is not part of the describe contract. We pin it too, so a
+ *   version bump does not masquerade as a contract change.
  *
  * To regenerate after an intentional change, run:
  *   UPDATE_SNAPSHOTS=1 pnpm test
@@ -26,9 +29,10 @@ import { generate } from '../src/cli.js'
 const FIXTURE = resolve(process.cwd(), 'test/fixtures/petstore.json')
 const SNAPSHOT_PATH = resolve(process.cwd(), 'test/__snapshots__/petstore-describe.json')
 const STABLE_SPEC_SOURCE = 'test/fixtures/petstore.json'
+const STABLE_GENERATOR_VERSION = '0.0.0-snapshot'
 
 interface CliSpecLike {
-  generator: { specSource: string; [k: string]: unknown }
+  generator: { specSource: string; version: string; [k: string]: unknown }
   [k: string]: unknown
 }
 
@@ -44,9 +48,10 @@ async function generatePetstoreSpec(): Promise<CliSpecLike> {
     const out = join(dir, 'gen')
     await generate({ spec: FIXTURE, output: out, name: 'petstore', version: '0.1.0' })
     const spec = JSON.parse(readFileSync(join(out, 'lib/operations.json'), 'utf8')) as CliSpecLike
-    // Stabilise the only environment-dependent field. Everything else is fully
-    // determined by the fixture + the explicit name/version above.
+    // Stabilise the fields that vary by environment or release. Everything else
+    // is fully determined by the fixture + the explicit name/version above.
     spec.generator.specSource = STABLE_SPEC_SOURCE
+    spec.generator.version = STABLE_GENERATOR_VERSION
     return spec
   })
 }

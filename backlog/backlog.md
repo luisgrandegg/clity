@@ -19,7 +19,7 @@ The MVP scope is in [`MVP.md`](../MVP.md). Items below decompose that scope into
 | F-003 | ✅ | Generated CLI runtime: commander + native fetch + describe + auth |
 | F-004 | ✅ | Stable error contract: stderr JSON + documented exit codes |
 | F-005 | ✅ | Petstore smoke test wired into CI |
-| F-008 | 🔲 | Recursive schemas crash the generator (circular JSON in `emit`) |
+| F-009 | 🔲 | Deduplicate shared schemas (Stripe's spec exceeds the node budget) |
 
 ## Beyond MVP
 

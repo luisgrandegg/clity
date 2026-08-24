@@ -109,6 +109,24 @@ The shape of \`describe\` output is documented at the clity repo. Key fields:
 - \`security[]\` — declared security schemes, by name
 - \`baseUrl\` — default base URL (override per-call with \`--base-url\`)
 
+### Recursive schemas
+
+Schemas are inlined in full, so most of them are self-contained. A schema that
+refers to itself (a tree, a linked list, a comment thread) cannot be — at the
+point where it would repeat, you get a marker instead:
+
+\`\`\`json
+{ "x-circular-ref": "#/operations/0/responses/0/schema" }
+\`\`\`
+
+The value is an [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901) JSON Pointer
+into the same \`describe\` document, naming the ancestor the cycle closes on.
+Resolve it against the document you already have — no second call is needed.
+Follow it only as deep as you need; the structure it points to repeats forever.
+
+A schema that appears in several places but does not refer to itself is not
+affected — it is emitted in full at each site.
+
 ## I/O contract
 
 | Channel | Contract |

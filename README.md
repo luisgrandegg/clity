@@ -46,7 +46,7 @@ The generator is TypeScript. The generated package is plain JavaScript with one 
 ### Run the generator
 
 ```bash
-npx clity <spec-url-or-path> --output ./my-cli [--name my-cli] [--version 0.1.0] [--force]
+npx clity <spec-url-or-path> --output ./my-cli [--name my-cli] [--package-version 0.1.0] [--force]
 ```
 
 Generates a complete npm package at `./my-cli`.
@@ -102,6 +102,15 @@ These are tracked as future work and are deliberately not in v0.1:
 - Shell completion scripts
 - Native binary distribution (`pkg`, `bun compile`)
 - An MCP-server output mode (interesting future direction: same generator, different target)
+- Deduplication of shared schemas. Dereferencing inlines every schema at each
+  use site, so a heavily cross-referenced spec expands combinatorially. clity
+  refuses a spec that expands past 5,000,000 nodes with an `emit` error rather
+  than running out of memory. GitHub's REST API (1221 operations) generates
+  fine at ~570k nodes; Stripe's spec does not. Tracked as F-009.
+
+Recursive schemas *are* supported: a self-reference is emitted as a
+`{ "x-circular-ref": "<json-pointer>" }` marker that resolves against the
+`describe` document. See the generated package's `AGENTS.md`.
 
 If you need one of these, file a backlog item.
 

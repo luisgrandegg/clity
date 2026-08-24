@@ -19,13 +19,39 @@ npx clity <spec-url-or-path> --output ./my-cli
 | `--output <dir>` | Where to write the generated package. **Required.** |
 | `--name <name>` | Override the CLI's package name (defaults to the spec's `info.title` slugged) |
 | `--description <text>` | Override the description (defaults to `info.description`) |
-| `--version <semver>` | Set the generated package's version (defaults to the spec's `info.version`) |
+| `--package-version <semver>` | Set the generated package's version (defaults to the spec's `info.version`). Note `--version` is Commander's built-in and prints clity's own version. |
 | `--force` | Overwrite the output directory if it exists |
 | `--base-url <url>` | Bake a base URL override into the generated CLI |
 
 Exit codes: `0` ok · `1` usage / parse error · `4` network error fetching the spec.
 
-All errors are JSON on stderr: `{ "error": "...", "message": "..." }`.
+All errors are JSON on stderr: `{ "error": "...", "message": "..." }`. The
+`error` field names the stage that failed, so a failure is attributable without
+reading the message:
+
+| `error` | Meaning |
+|---|---|
+| `usage` | Bad flags or arguments |
+| `parse` | The spec could not be loaded, validated, or dereferenced |
+| `normalize` | The spec parsed but could not be mapped to a CliSpec |
+| `emit` | The CliSpec could not be rendered (e.g. the spec is too large to embed) |
+| `write` | The output files could not be written to disk |
+| `network` | The spec URL could not be fetched |
+
+### Spec size
+
+Dereferencing inlines every shared schema at each use site. For a heavily
+cross-referenced spec that expansion is combinatorial — Stripe's spec reaches
+tens of millions of nodes from 589 operations, where GitHub's 1221 operations
+expand to ~570k. clity refuses a spec that expands past 5,000,000 nodes with an
+`emit` error rather than exhausting memory. Generating from a subset of the
+spec is the workaround; deduplicating shared schemas is tracked as F-009.
+
+### Recursive schemas
+
+A schema that refers to itself is emitted with a
+`{ "x-circular-ref": "<json-pointer>" }` marker at the point where it would
+repeat. See the generated package's `AGENTS.md` for how to resolve it.
 
 ## What it produces
 

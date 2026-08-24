@@ -1,6 +1,11 @@
+---
+**Completed:** 2026-08-24
+**Notes:** Added `src/generator/cycles.ts`. `breakCycles()` deep-copies the CliSpec, replacing each cycle back-edge with an RFC 6901 JSON Pointer marker (`{"x-circular-ref": "#/operations/0/responses/0/schema"}`) that resolves against the describe document itself — design option 1. Wired into `emit()` so every template receives a serialisable spec. Only back-edges to ancestors on the current walk path are replaced, so a repeated-but-acyclic subtree (a DAG) is still emitted in full; the petstore snapshot is byte-identical apart from a deliberately stabilised `generator.version`, confirming no change to output for specs that already generated. `describeVersion` stays at 1: the marker only appears where generation previously failed outright, so the shape grows without breaking (`CONSTITUTION.md § 2`). Error labels now name the failing pipeline stage, so an emit failure is no longer reported as `parse`. Discovered while verifying against Stripe that cycles were masking a second, separate defect — combinatorial DAG expansion — so `MAX_EXPANDED_NODES` (5,000,000) now refuses an oversized spec in ~1s with a structured `emit` error instead of a ~6-minute heap exhaustion; the real fix is tracked as F-009.
+---
+
 # F-008 — Recursive schemas crash the generator
 
-**Status:** 🔲 Todo
+**Status:** ✅ Done
 **Area:** src/generator/templates.ts, src/generator/emit.ts, AGENTS.md
 
 ## Why
@@ -41,13 +46,13 @@ Option 1 is the smallest change that loses no structural information.
 
 ## Acceptance criteria
 
-- [ ] A fixture at `test/fixtures/recursive-api.json` with a self-referencing schema
-- [ ] `clity` generates successfully from it (exit 0)
-- [ ] `lib/operations.json` is valid JSON and round-trips through `JSON.parse`
-- [ ] The generated CLI's `describe` and `describe <command>` both succeed
-- [ ] The chosen cycle representation is documented in the generated `AGENTS.md`
+- [x] A fixture at `test/fixtures/recursive-api.json` with a self-referencing schema
+- [x] `clity` generates successfully from it (exit 0)
+- [x] `lib/operations.json` is valid JSON and round-trips through `JSON.parse`
+- [x] The generated CLI's `describe` and `describe <command>` both succeed
+- [x] The chosen cycle representation is documented in the generated `AGENTS.md`
       (i.e. in `src/generator/templates.ts`)
-- [ ] `describeVersion` is bumped if the representation changes the contract
+- [x] `describeVersion` is bumped if the representation changes the contract — not bumped: existing output is byte-identical, so the shape grows without breaking
 
 ## Notes
 
