@@ -103,3 +103,57 @@ test('--force overwrites a non-empty output directory', async () => {
     await generate({ spec: FIXTURE, output: out, force: true })
   })
 })
+
+test('auth set writes credentials to the config file', async () => {
+  await withTmp(async (dir) => {
+    const out = join(dir, 'gen')
+    await generate({ spec: FIXTURE, output: out, name: 'petstore', version: '0.1.0' })
+
+    // The root program also declares --token/--api-key, and Commander binds the
+    // flag to the root command even when it appears after `auth set`. Guards the
+    // documented `<cli> auth set --token <t>` contract against that regression.
+    const nodeModules = resolve(process.cwd(), 'node_modules')
+    const home = join(dir, 'home')
+    const env = { ...process.env, NODE_PATH: nodeModules, HOME: home, USERPROFILE: home }
+
+    const set = spawnSync(
+      process.execPath,
+      [join(out, 'bin/cli.js'), 'auth', 'set', '--token', 'TOK', '--api-key', 'KEY'],
+      { env, encoding: 'utf8' },
+    )
+    assert.equal(set.status, 0, `auth set exited ${set.status}; stderr=${set.stderr}`)
+    assert.equal((JSON.parse(set.stdout) as { ok: boolean }).ok, true)
+
+    const cfg = JSON.parse(readFileSync(join(home, '.petstore/config.json'), 'utf8')) as {
+      token: string
+      apiKey: string
+    }
+    assert.equal(cfg.token, 'TOK')
+    assert.equal(cfg.apiKey, 'KEY')
+
+    const show = spawnSync(process.execPath, [join(out, 'bin/cli.js'), 'auth', 'show'], {
+      env,
+      encoding: 'utf8',
+    })
+    assert.equal(show.status, 0)
+    const shown = JSON.parse(show.stdout) as { hasToken: boolean; hasApiKey: boolean }
+    assert.equal(shown.hasToken, true)
+    assert.equal(shown.hasApiKey, true)
+  })
+})
+
+test('auth set with no credential flags fails with a usage error', async () => {
+  await withTmp(async (dir) => {
+    const out = join(dir, 'gen')
+    await generate({ spec: FIXTURE, output: out, name: 'petstore', version: '0.1.0' })
+
+    const nodeModules = resolve(process.cwd(), 'node_modules')
+    const home = join(dir, 'home')
+    const result = spawnSync(process.execPath, [join(out, 'bin/cli.js'), 'auth', 'set'], {
+      env: { ...process.env, NODE_PATH: nodeModules, HOME: home, USERPROFILE: home },
+      encoding: 'utf8',
+    })
+    assert.equal(result.status, 1)
+    assert.equal((JSON.parse(result.stderr) as { error: string }).error, 'usage')
+  })
+})
